@@ -1,111 +1,88 @@
-// Counter to prevent infinite loops
+// prevent infinite loop counter
 let counter = 0;
 
-function knightMoves([x, y], [targetx, targety], currentPath) {
-  // Store possible solutions. Going to need to find the shortest one.
-  let possibleSolutions = [];
+// counter ++;
+// if (counter > 10) {
+//   return "oops";
+// }
+
+// Want a node tree that can go both directions
+function Node([x,y], prev) {
+  let root = [x,y];
+  if (prev) {
+    return {root, prev};
+  }
+  return {root,}
+}
+
+// return an array of all visited nodes
+function visited(node) {
+  let visitedArray = [];
+  let currentNode = node;
   
-  // Counter to prevent infinite loops
-  if (counter > 200) {      
-    let solution;
-    console.log("Stop!");
-    let shortestIndex = 0;
-    console.log(possibleSolutions);
-    for(let i=1; i< possibleSolutions.length; i++){
-      if(possibleSolutions[shortestIndex].length > possibleSolutions[i].length) {
-      shortestIndex = i;
-      solution = possibleSolutions[shortestIndex];
-      }
-    console.log("SOLUTION?", solution);
-    }
-    return solution;
-  }
-  
-  // If we are out of bounds (range 0:7), return.
-  if (x > 7 || x < 0 || y > 7 || y < 0) {
-    return undefined;
+  while (currentNode) {
+    visitedArray.push(currentNode.root);
+    currentNode = currentNode.prev;
   }
 
-  counter ++;
-  
-  if (counter > 2000) {
-    console.log("Stop!");
-    return undefined;
+  return visitedArray;
+}
+
+// Build board
+function buildBoard() {
+  let boardArray = []
+  // Board is an 8x8 grid, with values [0,0] to [7,7]
+  for (let i = 0; i < 8; i ++) {
+    for (let j = 0; j < 8; j ++) {
+      boardArray.push([i,j]);
+    }    
   }
 
-  // if this is an existing path, add this square to the visited list
-  if (currentPath) {
-    currentPath.push([x,y]);
-  }
-  // if this is the start of a new path, create the visited list
-  if (!currentPath) {
-    currentPath = [[x,y]]
+  return boardArray;
+}
+
+function knightMoves([x,y], [targetx, targety]) {
+  if (x > 7 || targetx > 7 || y > 7 || targety > 7 || x < 0 || targetx < 0 || y < 0 || targety < 0) {
+    throw new Error("Out of bounds. Please use values between 0 - 7");
   }
 
-  console.log("Path", currentPath, currentPath.length);
-
-  if (currentPath.length > 10) {
-    console.log("too long, stop", currentPath.length);
-    return undefined;
-  }
-
-  // if this node has already been visited, return
-  for (let i in currentPath) {
-    let xindex = currentPath[i][0];
-    let yindex = currentPath[i][1];
-    // console.log("i:", i, "Current", x, y, "visited", xindex, yindex);
-    if (x === xindex && y === yindex) {
-        console.log("already visited");
-        break;
-    }
-  }
-  
-  // If we have arrived at desired square, return path
-  if (x === targetx && y === targety) {
-    console.log("FOUND ONE PATH");
-    return currentPath;
-  }
-
+  // List of possible moves
   // r = right, l = left, u = up, d = down, 
   let ruu = [x+1, y+2];
   let rru = [x+2, y+1];
   let rrd = [x+2, y-1];
   let rdd = [x+1, y-2];
-
   let ldd = [x-1, y-2];
   let lld = [x-2, y-1];
   let llu = [x-2, y+1];
   let luu = [x-1, y+2];
 
-  let moveRight = [ruu, rru, rrd, rdd];
-  let moveLeft = [lld, llu, luu, ldd];
+  let possibleMoves = [ruu, rru, rrd, rdd, lld, llu, luu, ldd];
 
-  // Go right
-  if (targetx >= x) {
-    for (let move = 0; move < moveRight.length; move++) {
-        console.log("MoveR",x,y, moveRight[move]);
-        let attempt = knightMoves(moveRight[move], [targetx, targety], currentPath);
-        if (attempt != undefined) {
-            possibleSolutions.push(attempt);
-            console.log("attempt done?", attempt);
-            // return;
-        }
+  for (let move = 0; move < possibleMoves.length; move ++) {
+    let movex = possibleMoves[move][0];
+    let movey = possibleMoves[move][1];
+    if (movex > 7 || movey > 7 || movex < 0 || movey < 0 ) {
+      possibleMoves[move] = null;
     }
-  }
-
-  // Go left
-  if (targetx <= x) {
-    for (let move = 0; move < moveLeft.length; move++) {
-        console.log("MoveL", x,y, moveLeft[move]);
-        let attempt = knightMoves(moveLeft[move], [targetx, targety], currentPath);
-        if (attempt != undefined) {
-            possibleSolutions.push(attempt);
-            console.log("attempt done?", attempt);
-            // return;
-        }
-    }
-  }
+  }  
 }
-console.log(knightMoves([3,3], [7,1]));
+
+function checkVisited(path) {
+  //check if visited
+}
+
+
+let myBoard = buildBoard();
+console.log(myBoard);
+
+let a = Node([0,0]);
+let b = Node([2,1], a);
+let c = Node([4,2], b);
+console.log(c);
+
+//// Cause an infitite loop!
+console.log(visited(c));
+// console.log(knightMoves([3,3], [7,1]));
 console.log(counter);
 
