@@ -1,7 +1,7 @@
 // prevent infinite loop counter
 let counter = 0;
 
-// Want a node tree to keep track of visited nodes
+// Want a node tree to keep track of previously visited nodes
 function Node([x,y], prev) {
   let root = [x,y];
   if (prev) {
@@ -10,10 +10,9 @@ function Node([x,y], prev) {
   return {root}
 }
 
-// Check if the new node (chess board location) has already been visited
+// Check if the new node (chess board location) has already been visited in the node tree.
 function checkVisited(newNode, oldNode) {
   let path = [];
-  console.log("old", oldNode);
   
   // Go through all the previous nodes one by one
   while (oldNode) {
@@ -21,31 +20,19 @@ function checkVisited(newNode, oldNode) {
     oldNode = oldNode.prev;
   }
 
-  if (path.length > 3) {
-    console.log("too long of a path");
-    return "long";
-  }
-
   // Check if the new node is in the old node path
   let newNodex = newNode.root[0];
   let newNodey = newNode.root[1];
 
   for (let i in path) {
-    // yes it has already been visited
+    // Yes it has already been visited
     if (newNodex === path[i][0] && newNodey === path[i][1]) {
-      // console.log("Already visited!");
       return true;
-    }
-    // no this node hasn't been visited
-    // do nothing 
+    }     
   }
-  console.log("checking visited", counter, path, newNode);
 }
 
-function knightMoves([x,y], [targetx, targety]) {
-  // Prevent infinite looping
-
-  
+function knightMoves([x,y], [targetx, targety]) {  
   if (x > 7 || targetx > 7 || y > 7 || targety > 7 || x < 0 || targetx < 0 || y < 0 || targety < 0) {
     throw new Error("Out of bounds. Please use values between 0 - 7");
   }
@@ -53,10 +40,9 @@ function knightMoves([x,y], [targetx, targety]) {
   let oldNode = Node([x,y]);
   let queue = [oldNode]; 
 
-  // Go through all possible moves and make sure they are in bounds
-  // make this a function I can call inside here?
+  // Go through all possible moves from currentNode and make sure they are in bounds
   const checkPossibleMoves = (currentNode, prevNode) => {
-
+    // x & y coordinates for current node
     let x = currentNode.root[0];
     let y = currentNode.root[1];
 
@@ -73,6 +59,7 @@ function knightMoves([x,y], [targetx, targety]) {
   
     let possibleMoves = [ruu, rru, rrd, rdd, lld, llu, luu, ldd];
   
+    // Try each move, and make sure they are in bounds
     for (let move = 0; move < possibleMoves.length; move++) {
       let movex = possibleMoves[move][0];
       let movey = possibleMoves[move][1];
@@ -80,7 +67,6 @@ function knightMoves([x,y], [targetx, targety]) {
         possibleMoves[move] = null;
         continue;
       }
-      // console.log(move, possibleMoves[move], possibleMoves);
   
       let possibleMoveNode = Node(possibleMoves[move]);
       
@@ -91,50 +77,50 @@ function knightMoves([x,y], [targetx, targety]) {
         possibleMoves[move] = null;
         continue;
       }
-      // If path is too long
-      if (checkValue === "long") {
-        return "too long";
-      }
   
       // check to see if any moves arrive at the target node
       if (movex === targetx && movey === targety) {
         let finalNode = Node([movex, movey], currentNode);
-        console.log("Arrived at target!", finalNode);
         let finalPath = [];
-        // Go through all the previous nodes one by one
+        let finalPathReversed = [];
+
+        // Go through all the previous nodes one by one to list them in an array
         while (finalNode) {
           finalPath.push(finalNode.root);
           finalNode = finalNode.prev;
         }
-        return finalPath;
+        // Reverse the order of the array
+        console.log(`You made it in ${finalPath.length} moves! Here is a path:`)
+        while (finalPath.length > 0) {
+          let popped = finalPath.pop();
+          console.log(popped);
+          finalPathReversed.push(popped);
+        }
+        return finalPathReversed;
       }
   
-      // put in queue
-      //// the nextNode is missing a previous node but not the first one
-      
+      // Push this move into the queue      
       queue.push(Node(possibleMoves[move], currentNode));
     }
   }
-  console.log(queue);
   // continue searching from remaining possible moves
-  // do I want to limit directionality (right/left)?
   while (queue.length > 0) {
 
+    // Prevent infinite loop if something goes wrong.
     counter ++; 
-    if (counter > 25) {
+    if (counter > 1000) {
       return "stop the madness!"
     }
     
+    // Begin at start of queue
     let nextNode = queue[0];
-    let nextMove = nextNode.root;
 
+    // If the item in queue has a previous node, update the current path
     if (queue[0].prev) {
       oldNode = nextNode.prev;
-      console.log("add it", queue[0], queue[0].prev);
     }
 
-    console.log("125 heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeere", nextNode, nextMove, oldNode);
-    // use the queueue
+    // Use the queue
     let nextCheck = checkPossibleMoves(nextNode, oldNode);
     if (typeof(nextCheck) === 'object') {
       return nextCheck;
@@ -143,28 +129,7 @@ function knightMoves([x,y], [targetx, targety]) {
   }
 }
 
-// let myBoard = buildBoard();
-// console.log(myBoard);
+// To find a path between two squares on the board (x & y values range from 0-7):
+// Type knightMoves([startingx, startingy], [destinationx, destinationy])
 
-let a = Node([0,0]);
-// let b = Node([2,1], a);
-// let c = Node([4,2], b);
-// console.log(c);
-console.log(a);
-
-// checkVisited(Node([7,7]), c);
-console.log(knightMoves([3,3], [7,5]));
-console.log("counter", counter);
-
-// Build board
-// This doesn't do anything yet...
-function buildBoard() {
-  let boardArray = []
-  // Board is an 8x8 grid, with values [0,0] to [7,7]
-  for (let i = 0; i < 8; i ++) {
-    for (let j = 0; j < 8; j ++) {
-      boardArray.push([i,j]);
-    }    
-  }
-  return boardArray;
-}
+knightMoves([3,3], [7,7]);
