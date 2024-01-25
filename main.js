@@ -13,7 +13,7 @@ function Node([x,y], prev) {
 // Check if the new node (chess board location) has already been visited
 function checkVisited(newNode, oldNode) {
   let path = [];
-  // console.log("old", oldNode);
+  console.log("old", oldNode);
   
   // Go through all the previous nodes one by one
   while (oldNode) {
@@ -39,7 +39,7 @@ function checkVisited(newNode, oldNode) {
     // no this node hasn't been visited
     // do nothing 
   }
-  // console.log("checking visited", counter, path, newNode);
+  console.log("checking visited", counter, path, newNode);
 }
 
 function knightMoves([x,y], [targetx, targety]) {
@@ -98,9 +98,15 @@ function knightMoves([x,y], [targetx, targety]) {
   
       // check to see if any moves arrive at the target node
       if (movex === targetx && movey === targety) {
-        let finalNode = Node([movex, movey], prevNode);
+        let finalNode = Node([movex, movey], currentNode);
         console.log("Arrived at target!", finalNode);
-        return finalNode;
+        let finalPath = [];
+        // Go through all the previous nodes one by one
+        while (finalNode) {
+          finalPath.push(finalNode.root);
+          finalNode = finalNode.prev;
+        }
+        return finalPath;
       }
   
       // put in queue
@@ -124,7 +130,7 @@ function knightMoves([x,y], [targetx, targety]) {
 
     if (queue[0].prev) {
       oldNode = nextNode.prev;
-      // console.log("add it", queue[0], queue[0].prev);
+      console.log("add it", queue[0], queue[0].prev);
     }
 
     console.log("125 heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeere", nextNode, nextMove, oldNode);
